@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lcsw.background.mapper.MerchantMapper">
+    <resultMap id="BaseResultMap" type="com.lcsw.background.domain.Merchant">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="createtime" jdbcType="TIMESTAMP" property="createtime"/>
+        <result column="merchantid" jdbcType="INTEGER" property="merchantid"/>
+        <result column="merchantno" jdbcType="VARCHAR" property="merchantno"/>
+        <result column="merchantname" jdbcType="VARCHAR" property="merchantname"/>
+        <result column="regional_id" jdbcType="INTEGER" property="regionalId"/>
+        <result column="regional_name" jdbcType="VARCHAR" property="regionalName"/>
+        <result column="agent_id" jdbcType="INTEGER" property="agentId"/>
+        <result column="agent_name" jdbcType="VARCHAR" property="agentName"/>
+        <result column="salesman_id" jdbcType="INTEGER" property="salesmanId"/>
+        <result column="salesman_name" jdbcType="VARCHAR" property="salesmanName"/>
+        <result column="merchant_createtime" jdbcType="TIMESTAMP" property="merchantCreatetime"/>
+        <result column="terminalno" jdbcType="VARCHAR" property="terminalno"/>
+        <result column="token" jdbcType="VARCHAR" property="token"/>
+        <result column="matching_userid" jdbcType="INTEGER" property="matchingUserid"/>
+        <result column="pay_status" jdbcType="TINYINT" property="payStatus"/>
+        <result column="pay_msg" jdbcType="VARCHAR" property="payMsg"/>
+        <result column="orderbody" jdbcType="VARCHAR" property="orderbody"/>
+    </resultMap>
+
+    <!--返回支付状态结果集-->
+    <resultMap id="AdminResultMap" type="com.lcsw.background.domain.Admin">
+        <result column="matching_userid" jdbcType="VARCHAR" property="matchingUserid"/>
+        <result column="pay_status" jdbcType="TINYINT" property="payStatus"/>
+        <result column="count" jdbcType="INTEGER" property="count"/>
+    </resultMap>
+
+    <!--查询商户号、终端号、令牌-->
+    <select id="getUrl" parameterType="java.lang.Integer" resultType="com.lcsw.background.domain.Merchant">
+        SELECT t1.merchantno,t1.terminalno,t1.token,t1.merchantid ,t1.id FROM test_merchant_uni t1,test_users t2 WHERE t1.pay_status =0 and t1.matching_userid=t2.id and t2.id=#{id} LIMIT 1;
+    </select>
+
+    <!--根据二维码支付状态，查询剩余未处理数量-->
+    <select id="queryRemainCode" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        SELECT  COUNT(1) FROM test_merchant_uni WHERE matching_userid=#{userid} AND pay_status=0;
+    </select>
+
+    <!--查询所有二维码数量-->
+    <select id="queryAllCode" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        SELECT  COUNT(1) FROM test_merchant_uni WHERE matching_userid=#{userid};
+    </select>
+
+    <!--管理员页面查询-->
+    <select id="queryPay" resultMap="AdminResultMap">
+        select t1.matching_userid,t2.username,t1.pay_status,count(1) as count from test_merchant_uni t1,test_users t2
+        <where>
+            t1.matching_userid=t2.id
+            <if test="username !=null and username!=''">
+                and t2.username = #{username}
+            </if>
+        </where>
+        GROUP BY t1.matching_userid,t1.pay_status order by t1.matching_userid
+    </select>
+
+    <!--修改交易状态-->
+    <update id="updatePayStatus">
+        update test_merchant_uni set pay_status=#{status} ,pay_msg=#{pay_msg} where merchantid=#{merchantid};
+    </update>
+
+
+    <!--  查询用户名ID   -->
+    <select id="findUserId" parameterType="com.lcsw.background.domain.MerchantParam" resultType="int">
+        SELECT DISTINCT matching_userid FROM test_merchant_uni WHERE matching_userid IS NOT NULL
+    </select>
+
+    <!--  根据账户的id 以及 时间查询 商户信息  -->
+    <select id="findByuserIdsAndTime" parameterType="com.lcsw.background.domain.MerchantParam"
+            resultType="com.lcsw.background.domain.UserPayStauCount">
+        SELECT username, matching_userid userId,pay_status payStatus,COUNT(1) payCount FROM
+        test_merchant_uni,test_users where 1=1
+        <foreach collection="list" open="and matching_userid in (" close=")" separator="," item="id">
+            #{id}
+        </foreach>
+        AND matching_userid=test_users.`id` GROUP BY matching_userid ,pay_status
+    </select>
+
+</mapper>

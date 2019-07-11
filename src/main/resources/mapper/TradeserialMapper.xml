@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lcsw.background.mapper.TradeserialMapper">
+    <resultMap id="BaseResultMap" type="com.lcsw.background.domain.Tradeserial">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="merchantid" jdbcType="INTEGER" property="merchantid"/>
+        <result column="merchant_no" jdbcType="VARCHAR" property="merchantNo"/>
+        <result column="terminalno" jdbcType="VARCHAR" property="terminalno"/>
+        <result column="createtime" jdbcType="TIMESTAMP" property="createtime"/>
+        <result column="createdate" jdbcType="DATE" property="createdate"/>
+        <result column="out_trade_no" jdbcType="VARCHAR" property="outTradeNo"/>
+        <result column="out_refund_no" jdbcType="VARCHAR" property="outRefundNo"/>
+        <result column="total_fee" jdbcType="INTEGER" property="totalFee"/>
+        <result column="pay_status_code" jdbcType="TINYINT" property="payStatusCode"/>
+        <result column="pay_status_msg" jdbcType="VARCHAR" property="payStatusMsg"/>
+        <result column="channel_user_id" jdbcType="VARCHAR" property="channelUserId"/>
+        <result column="channel_trade_no" jdbcType="VARCHAR" property="channelTradeNo"/>
+        <result column="endtime" jdbcType="VARCHAR" property="endtime"/>
+    </resultMap>
+
+    <!--显示详情-->
+    <select id="queryDetail" resultMap="BaseResultMap">
+        select t1.merchant_no,t1.id,t1.out_trade_no,t1.pay_status_code,t1.total_fee,t1.endtime,t1.pay_status_msg
+        from test_tradeserial t1 ,test_users t2 ,test_merchant_uni t3
+        <where>
+            t2.id = t3.matching_userid and t1.merchantid =t3.merchantid and t2.username=#{username}
+            <if test="merchant_no !=null and merchant_no!=''">
+                and t1.merchant_no = #{merchant_no}
+            </if>
+            <if test="id!=null">
+                and t1.id =#{id}
+            </if>
+            <if test="out_trade_no!=null and out_trade_no!=''">
+                and t1.out_trade_no =#{out_trade_no}
+            </if>
+        </where>
+    </select>
+
+    <!--点击子账号显示相关详情-->
+    <select id="payDetail" resultMap="BaseResultMap">
+        select t1.merchant_no,t1.id,t1.pay_status_code,t1.out_trade_no,t1.pay_status_msg,t1.total_fee,t1.endtime from test_tradeserial t1, test_users t2
+        ,test_merchant_uni t3
+        where t2.id = t3.matching_userid and t1.merchantid =t3.merchantid and t2.username=#{username}
+    </select>
+
+    <!--轮询查询二维码支付状态-->
+    <select id="queyPayCode" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        select pay_status_code from test_tradeserial where merchantid=#{merchantid}
+    </select>
+
+
+    <!--插入订单表-->
+    <insert id="insert">
+        insert into test_tradeserial (merchantid,merchant_no,terminalno,createtime,createdate,out_trade_no,total_fee,pay_status_code,pay_status_msg,endtime)
+        values (#{merchantid},#{merchant_no},#{terminalno},#{createtime},#{createdate},#{out_trade_no},#{total_fee},#{pay_status_code},#{pay_status_msg},#{endtime});
+    </insert>
+
+
+
+
+
+</mapper>

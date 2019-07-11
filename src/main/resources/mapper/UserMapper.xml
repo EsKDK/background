@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lcsw.background.mapper.UserMapper">
+    <resultMap id="BaseResultMap" type="com.lcsw.background.domain.User">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="username" jdbcType="VARCHAR" property="username"/>
+        <result column="createtime" jdbcType="VARCHAR" property="createtime"/>
+        <result column="nickname" jdbcType="VARCHAR" property="nickname"/>
+        <result column="password" jdbcType="VARCHAR" property="password"/>
+        <result column="type" jdbcType="TINYINT" property="type"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="email" jdbcType="VARCHAR" property="email"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="lasttime" jdbcType="VARCHAR" property="lasttime"/>
+        <result column="lastip" jdbcType="VARCHAR" property="lastip"/>
+    </resultMap>
+
+    <!--用户名登录-->
+    <select id="loginByUsername" parameterType="java.lang.String" resultType="com.lcsw.background.domain.User">
+        SELECT * FROM test_users where username=#{username} and status=0;
+    </select>
+    <!--邮箱登录-->
+    <select id="loginByEmail" parameterType="java.lang.String" resultType="com.lcsw.background.domain.User">
+        SELECT * FROM test_users where email=#{email} and status=0;
+    </select>
+    <!--手机号登录-->
+    <select id="loginByPhone" parameterType="java.lang.String" resultType="com.lcsw.background.domain.User">
+        SELECT * FROM test_users where phone=#{phone} and status=0;
+    </select>
+
+    <!--修改上次登录IP和时间-->
+    <update id="updateIPAndDate">
+        update test_users set lasttime=#{lasttime},lastip=#{lastip} where username=#{username};
+    </update>
+
+</mapper>
